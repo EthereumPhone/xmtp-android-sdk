@@ -47,6 +47,27 @@ Returns all accounts with which you had conversations with.
 
 Returns all messages you had with a specific account.
 
+### How to add the SDK
+
+Go to your root `build.gradle` or `settings.gradle`, and add this:
+
+```
+allprojects {
+	repositories {
+		...
+		maven { url 'https://jitpack.io' }
+	}
+}
+```
+
+Then add the dependency:
+
+```
+dependencies {
+	implementation 'com.github.EthereumPhone:xmtp-android-sdk:0.1.0'
+}
+```
+
 ### Current shortcoming
 
 At the moment when initializing the API, it has an account saved, and there is no way yet to import an account. In the future there should be a `@JavascriptInterface`, which handles the common web3 methods.
