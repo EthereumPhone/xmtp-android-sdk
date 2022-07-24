@@ -18,7 +18,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         XMTPApi xmtpApi = new XMTPApi(this);
-        xmtpApi.sendMessage("Hello. Newest sent from SDK!", "0x2374eFc48c028C98e259a7bBcba336d6acFF103c");
+        xmtpApi.sendMessage("Hey! It all works in parallel?", "0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete(new BiConsumer<String, Throwable>() {
+            @Override
+            public void accept(String s, Throwable throwable) {
+                Log.d("Message sent! on XMTP", s);
+            }
+        });
         xmtpApi.getPeerAccounts().whenComplete(new BiConsumer<ArrayList<String>, Throwable>() {
             @Override
             public void accept(ArrayList<String> strings, Throwable throwable) {
