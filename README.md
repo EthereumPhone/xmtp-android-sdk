@@ -14,7 +14,12 @@ Some example code on how to interact with the sdk:
 
 ```java
 // Send a message over XMTP
-xmtpApi.sendMessage("Hello. Newest sent from SDK!", "0x2374eFc48c028C98e259a7bBcba336d6acFF103c");
+xmtpApi.sendMessage("Hey!", "0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete(new BiConsumer<String, Throwable>() {
+    @Override
+    public void accept(String s, Throwable throwable) {
+        Log.d("Message sent on XMTP!", s);
+    }
+});
 
 // Get all accounts with which you had a conversation with
 xmtpApi.getPeerAccounts().whenComplete(new BiConsumer<ArrayList<String>, Throwable>() {
@@ -35,7 +40,7 @@ xmtpApi.getMessages("0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete(n
 
 ### Supported functions
 
-`void sendMessage(String message, String target)`
+`CompletableFuture<String> sendMessage(String message, String target)`
 
 To send a message with `message` as the content and `target` as the target address for the message.
 
@@ -64,7 +69,7 @@ Then add the dependency:
 
 ```
 dependencies {
-	implementation 'com.github.EthereumPhone:xmtp-android-sdk:0.1.0'
+	implementation 'com.github.EthereumPhone:xmtp-android-sdk:0.1.2'
 }
 ```
 
