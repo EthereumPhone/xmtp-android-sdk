@@ -4,8 +4,8 @@
 
 How to initialize the SDK:
 
-```java
-XMTPApi xmtpApi = new XMTPApi(this);
+```kotlin
+val xmtpApi = XMTPApi(this)
 ```
 
 ### Example code
@@ -14,41 +14,32 @@ Some example code on how to interact with the sdk:
 
 ```java
 // Send a message over XMTP
-xmtpApi.sendMessage("Hey!", "0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete(new BiConsumer<String, Throwable>() {
-    @Override
-    public void accept(String s, Throwable throwable) {
-        Log.d("Message sent on XMTP!", s);
-    }
-});
+xmtpApi.sendMessage("Hey!", "0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete { s, throwable ->
+	Log.d("First message on TEST", s)
+}
 
 // Get all accounts with which you had a conversation with
-xmtpApi.getPeerAccounts().whenComplete(new BiConsumer<ArrayList<String>, Throwable>() {
-    @Override
-    public void accept(ArrayList<String> strings, Throwable throwable) {
-        Log.d("First conversation on XMTP", strings.get(0));
-    }
-});
+xmtpApi.peerAccounts.whenComplete { arrayList, throwable ->
+	Log.d("First conversation on TEST", arrayList[0]!!)
+}
 
 // Get all messages from a conversation with a specific account
-xmtpApi.getMessages("0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete(new BiConsumer<ArrayList<String>, Throwable>() {
-    @Override
-    public void accept(ArrayList<String> strings, Throwable throwable) {
-        Log.d("First message on XMTP", strings.get(0));
-    }
-});
+xmtpApi.getMessages("0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete { arrayList, throwable ->
+	Log.d("First message on TEST", arrayList[0]!!)
+}
 ```
 
 ### Supported functions
 
-`CompletableFuture<String> sendMessage(String message, String target)`
+`sendMessage(message: String, target: String): CompletableFuture<String> `
 
 To send a message with `message` as the content and `target` as the target address for the message.
 
-`CompletableFuture<ArrayList<String>> getPeerAccounts()`
+`getPeerAccounts(): CompletableFuture<ArrayList<String>> `
 
 Returns all accounts with which you had conversations with.
 
-`CompletableFuture<ArrayList<String>> getMessages(String target)`
+`getMessages(target: String): CompletableFuture<ArrayList<String>> `
 
 Returns all messages you had with a specific account.
 
