@@ -12,7 +12,7 @@ val xmtpApi = XMTPApi(this)
 
 Some example code on how to interact with the sdk:
 
-```java
+```kotlin
 // Send a message over XMTP
 xmtpApi.sendMessage("Hey!", "0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete { s, throwable ->
 	Log.d("First message on TEST", s)
