@@ -23,6 +23,7 @@ public class XMTPApi {
 
     private Context context;
     private WebView wv;
+    private Signer signer;
     private Map<String, CompletableFuture<ArrayList<String>>> completableFutures;
     private Map<String, CompletableFuture<String>> sentMessages;
 
@@ -59,8 +60,40 @@ public class XMTPApi {
         output.append(content);
         output.append("</script>");
         wv.loadDataWithBaseURL("file:///android_res/raw/main_page.html", output.toString(), "text/html", "utf-8", null);
+    }
+    public XMTPApi(Context con, Signer signer) {
+        context = con;
+        this.signer = signer;
+        completableFutures = new HashMap<>();
+        sentMessages = new HashMap<>();
+
+        String content = "";
+        try {
+            content = getAssetContent(context.getResources().openRawResource(R.raw.init));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        wv = new WebView(context);
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.getSettings().setAllowFileAccess(true);
+        wv.getSettings().setDomStorageEnabled(true); // Turn on DOM storage
+        wv.getSettings().setAppCacheEnabled(true); //Enable H5 (APPCache) caching
+        wv.getSettings().setDatabaseEnabled(true);
 
 
+        wv.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                android.util.Log.d("WebView", consoleMessage.message());
+                return true;
+            }
+        });
+
+        StringBuilder output = new StringBuilder();
+        output.append("<script type='text/javascript' type='module'>\n");
+        output.append(content);
+        output.append("</script>");
+        wv.loadDataWithBaseURL("file:///android_res/raw/main_page.html", output.toString(), "text/html", "utf-8", null);
     }
 
     private String getAssetContent(InputStream filename) throws IOException {
@@ -193,6 +226,18 @@ public class XMTPApi {
         }
     }
 
+    private class AndroidSigner {
+        @JavascriptInterface
+        public String getAddress(){
+            return signer.getAddress();
+        }
+
+        @JavascriptInterface
+        public String signMessage(String message) {
+            return signer.signMessage(message);
+        }
+    }
+
     public static String sha256(final String base) {
         try{
             final MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -210,4 +255,3 @@ public class XMTPApi {
         }
     }
 }
-
