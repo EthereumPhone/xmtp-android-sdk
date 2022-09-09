@@ -27,40 +27,6 @@ public class XMTPApi {
     private Map<String, CompletableFuture<ArrayList<String>>> completableFutures;
     private Map<String, CompletableFuture<String>> sentMessages;
 
-    public XMTPApi(Context con) {
-        context = con;
-
-        completableFutures = new HashMap<>();
-        sentMessages = new HashMap<>();
-
-        String content = "";
-        try {
-            content = getAssetContent(context.getResources().openRawResource(R.raw.init));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        wv = new WebView(context);
-        wv.getSettings().setJavaScriptEnabled(true);
-        wv.getSettings().setAllowFileAccess(true);
-        wv.getSettings().setDomStorageEnabled(true); // Turn on DOM storage
-        wv.getSettings().setAppCacheEnabled(true); //Enable H5 (APPCache) caching
-        wv.getSettings().setDatabaseEnabled(true);
-
-
-        wv.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                android.util.Log.d("WebView", consoleMessage.message());
-                return true;
-            }
-        });
-
-        StringBuilder output = new StringBuilder();
-        output.append("<script type='text/javascript' type='module'>\n");
-        output.append(content);
-        output.append("</script>");
-        wv.loadDataWithBaseURL("file:///android_res/raw/main_page.html", output.toString(), "text/html", "utf-8", null);
-    }
     public XMTPApi(Context con, Signer signer) {
         context = con;
         this.signer = signer;
@@ -109,12 +75,21 @@ public class XMTPApi {
         webView.getSettings().setDomStorageEnabled(true); // Turn on DOM storage
         webView.getSettings().setAppCacheEnabled(true); //Enable H5 (APPCache) caching
         webView.getSettings().setDatabaseEnabled(true);
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                android.util.Log.d("WebView", consoleMessage.message());
+                return true;
+            }
+        });
+
+        webView.addJavascriptInterface(new AndroidSigner(), "AndroidSigner");
 
         String hash = sha256(message+":"+target+":"+System.currentTimeMillis());
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
         String content = "";
         try {
-            content = getAssetContent(this.context.getResources().openRawResource(R.raw.sendmessage));
+            content = getAssetContent(this.context.getResources().openRawResource(R.raw.getmessages));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -123,7 +98,7 @@ public class XMTPApi {
         output.append("<script type='text/javascript' type='module'>\n");
         output.append(content);
         output.append("</script>\n");
-        String jsOut = output.toString().replace("%message%", message).replace("%target%", target).replace("%hash%", hash);
+        String jsOut = output.toString().replace("%message%", message).replace("%target%", target).replace("%hash%", hash).replace("%WHICH_FUNCTION%", "sendMessage");
         webView.loadDataWithBaseURL("file:///android_asset/index.html", jsOut, "text/html", "utf-8", null);
         this.sentMessages.put(hash, completableFuture);
         return completableFuture;
@@ -144,12 +119,20 @@ public class XMTPApi {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                android.util.Log.d("WebView", consoleMessage.message());
+                return true;
+            }
+        });
 
         StringBuilder output = new StringBuilder();
         output.append("<script type='text/javascript' type='module'>\n");
         output.append(content);
         output.append("</script>\n");
         webView.addJavascriptInterface(new DataReceiver(), "Android");
+        webView.addJavascriptInterface(new AndroidSigner(), "AndroidSigner");
         webView.loadDataWithBaseURL("file:///android_asset/index.html", output.toString(), "text/html", "utf-8", null);
         this.completableFutures.put("getPeerAccounts", completableFuture);
         return completableFuture;
@@ -162,6 +145,13 @@ public class XMTPApi {
         webView.getSettings().setDomStorageEnabled(true); // Turn on DOM storage
         webView.getSettings().setAppCacheEnabled(true); //Enable H5 (APPCache) caching
         webView.getSettings().setDatabaseEnabled(true);
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                android.util.Log.d("WebView", consoleMessage.message());
+                return true;
+            }
+        });
 
         CompletableFuture<ArrayList<String>> completableFuture = new CompletableFuture<>();
         String content = "";
@@ -175,8 +165,9 @@ public class XMTPApi {
         output.append("<script type='text/javascript' type='module'>\n");
         output.append(content);
         output.append("</script>\n");
-        String jsOut = output.toString().replace("%target%", target);
+        String jsOut = output.toString().replace("%target%", target).replace("%WHICH_FUNCTION%", "getMessages");
         webView.addJavascriptInterface(new DataReceiver(), "Android");
+        webView.addJavascriptInterface(new AndroidSigner(), "AndroidSigner");
         webView.loadDataWithBaseURL("file:///android_asset/index.html", jsOut, "text/html", "utf-8", null);
         this.completableFutures.put("getMessages", completableFuture);
         return completableFuture;
