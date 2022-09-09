@@ -7,6 +7,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.ethereumphone.xmtp_android_sdk.MessageCallback;
 import org.ethereumphone.xmtp_android_sdk.XMTPApi;
 import org.ethereumphone.xmtp_android_sdk.Signer;
 import org.walletconnect.Session;
@@ -71,17 +72,27 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
  */
-                xmtpApi.sendMessage("Hey, howie doin", "0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete(new BiConsumer<String, Throwable>() {
+                xmtpApi.sendMessage("Message sent from WU, mit Elie", "0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete(new BiConsumer<String, Throwable>() {
                     @Override
                     public void accept(String s, Throwable throwable) {
                         Log.d("Message sent! on XMTP", s);
                     }
                 });
 
+                //xmtpApi.listenMessages("0x2374eFc48c028C98e259a7bBcba336d6acFF103c", new MessageCallbackImpl());
+
                 return null;
             }
         });
 
+    }
+}
+
+class MessageCallbackImpl implements MessageCallback {
+
+    @Override
+    public void newMessage(String from, String content) {
+        System.out.println("NEW_MESSAGE["+from+"]: "+content);
     }
 }
 

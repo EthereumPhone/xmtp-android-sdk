@@ -26,12 +26,15 @@ public class XMTPApi {
     private Signer signer;
     private Map<String, CompletableFuture<ArrayList<String>>> completableFutures;
     private Map<String, CompletableFuture<String>> sentMessages;
+    private Map<String, MessageCallback> messageCallbackMap;
+
 
     public XMTPApi(Context con, Signer signer) {
         context = con;
         this.signer = signer;
         completableFutures = new HashMap<>();
         sentMessages = new HashMap<>();
+        messageCallbackMap = new HashMap<>();
 
         String content = "";
         try {
@@ -173,6 +176,41 @@ public class XMTPApi {
         return completableFuture;
     }
 
+    public void listenMessages(String target, MessageCallback messageCallback) {
+        WebView webView = new WebView(context);
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setAllowFileAccess(true);
+        webView.getSettings().setDomStorageEnabled(true); // Turn on DOM storage
+        webView.getSettings().setAppCacheEnabled(true); //Enable H5 (APPCache) caching
+        webView.getSettings().setDatabaseEnabled(true);
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                android.util.Log.d("WebView", consoleMessage.message());
+                return true;
+            }
+        });
+
+        CompletableFuture<ArrayList<String>> completableFuture = new CompletableFuture<>();
+        String content = "";
+        try {
+            content = getAssetContent(this.context.getResources().openRawResource(R.raw.listenmessages));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        messageCallbackMap.put(target, messageCallback);
+
+        StringBuilder output = new StringBuilder();
+        output.append("<script type='text/javascript' type='module'>\n");
+        output.append(content);
+        output.append("</script>\n");
+        String jsOut = output.toString().replace("%target%", target);
+        webView.addJavascriptInterface(new DataReceiver(), "Android");
+        webView.addJavascriptInterface(new AndroidSigner(), "AndroidSigner");
+        webView.loadDataWithBaseURL("file:///android_asset/index.html", jsOut, "text/html", "utf-8", null);
+    }
+
     private class DataReceiver {
         @JavascriptInterface
         public void sharePeers(String data) {
@@ -213,6 +251,13 @@ public class XMTPApi {
             if (sentMessages.get(hash) != null) {
                 sentMessages.get(hash).complete("");
                 sentMessages.remove(hash);
+            }
+        }
+
+        @JavascriptInterface
+        public void listenNewMessage(String target, String senderAddress, String content){
+            if(messageCallbackMap.get(target) != null) {
+                messageCallbackMap.get(target).newMessage(senderAddress, content);
             }
         }
     }

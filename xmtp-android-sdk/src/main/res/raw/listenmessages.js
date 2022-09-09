@@ -2288,7 +2288,6 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 },{"process/browser.js":5,"timers":6}],7:[function(require,module,exports){
 const { Client } = require('@xmtp/xmtp-js')
 const { Wallet, Signer } = require('ethers')
-let wallet;
 let xmtp;
 
 const getMethods = (obj) => {
@@ -2351,18 +2350,17 @@ class AndroidSigner extends Signer {
     }
 }
 
-var WHAT = "%WHICH_FUNCTION%";
-
 const signer = new AndroidSigner();
 
-async function getMessages(target, msg) {
-    // Create the client with your wallet. This will connect to the XMTP development network by default  
 
-    console.log(WHAT + ": ", getMethods(signer))
+async function listenMessages(target) {
+    // Create the client with your wallet. This will connect to the XMTP development network by default    
+    // Start a conversation with Vitalik
+    console.log("sendMessage: ", getMethods(signer))
 
     var address = await signer.getAddress();
 
-    console.log("My precious address (" + WHAT + "): ", JSON.stringify(address), address === undefined)
+    console.log("My precious address (sendMessage): ", JSON.stringify(address), address === undefined)
 
     if (localStorage.getItem("xmtp") === null) {
         xmtp = await Client.create(signer);
@@ -2372,63 +2370,17 @@ async function getMessages(target, msg) {
         xmtp = eval("(" + localStorage.getItem("xmtp") + ")")
     }
 
-    console.log("Finished creating xmtp_client")
 
     const conversation = await xmtp.conversations.newConversation(target)
 
-    console.log("Finished creating conversation")
-
-    if (WHAT === "getMessages") {
-        output = []
-
-        console.log("Get_message address is: " + address)
-
-        const messages = await conversation.messages()
-
-        for (const message of messages) {
-            output.push(message.content)
-        }
-
-        if (window.Android) {
-            window.Android.shareMessages(JSON.stringify(output))
-        }
+    for await (const message of await conversation.streamMessages()) {
+        console.log(`[${message.senderAddress}]: ${message.content}`)
+        window.Android.listenNewMessage(target, message.senderAddress, message.content)
     }
-    if (WHAT === "sendMessage") {
-        console.log("Executing sendMessage if")
-            // Send a message
-        const receipt = await conversation.send(msg)
-
-        console.log("Sending", JSON.stringify(receipt), "from", address)
-
-        if (window.Android) {
-            window.Android.sentMessage("%hash%")
-        }
-    }
-}
-
-async function sendMessage(msg, target) {
-    // Create the client with your wallet. This will connect to the XMTP development network by default    
-    // Start a conversation with Vitalik
-    console.log("sendMessage: ", getMethods(signer))
-
-    var address = await signer.getAddress();
-
-    console.log("My precious address (sendMessage): ", JSON.stringify(address), address === undefined)
-
-    xmtp = await Client.create(signer);
-    const conversation = await xmtp.conversations.newConversation(target)
-
 
 }
 
-if (WHAT === "getMessages") {
-    //getMessages("%target%").then(res => console.log("Result get"+res)).catch(e => console.log(e))
-}
-if (WHAT === "sendMessage") {
-    //sendMessage("%message%", "%target%").then(res => console.log("Result get"+res)).catch(e => console.log(e.stack))
-}
-
-getMessages("%target%", "%message%").then(res => console.log("Result get" + res)).catch(e => console.log(e))
+listenMessages("%target%")
 },{"@xmtp/xmtp-js":129,"ethers":153}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
