@@ -67,7 +67,7 @@ Then add the dependency:
 
 ```
 dependencies {
-	implementation 'com.github.EthereumPhone:xmtp-android-sdk:0.1.2'
+	implementation 'com.github.EthereumPhone:xmtp-android-sdk:0.1.3'
 }
 ```
 
