@@ -27,6 +27,9 @@ xmtpApi.peerAccounts.whenComplete { arrayList, throwable ->
 xmtpApi.getMessages("0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete { arrayList, throwable ->
 	Log.d("First message on TEST", arrayList[0]!!)
 }
+
+// Listen for new messages
+xmtpApi.listenMessages("0x2374eFc48c028C98e259a7bBcba336d6acFF103c", messageCallback)
 ```
 
 ### Supported functions
