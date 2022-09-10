@@ -2293,12 +2293,12 @@ const { Wallet, Signer } = require('ethers')
 let wallet;
 
 
-if (localStorage.getItem("wallet") === null) {
+if (localStorage.getItem("keys") === null) {
   wallet = Wallet.createRandom()
 
-  localStorage.setItem("wallet", wallet.privateKey)
+  localStorage.setItem("keys", wallet.privateKey)
 } else {
-  wallet = new Wallet(localStorage.getItem("wallet"))
+  wallet = new Wallet(localStorage.getItem("keys"))
 }
 
 class AndroidSigner extends Signer {

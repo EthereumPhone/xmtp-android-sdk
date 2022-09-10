@@ -2299,27 +2299,6 @@ const getMethods = (obj) => {
     return [...properties.keys()].filter(item => typeof obj[item] === 'function')
 }
 
-function objToString(obj, ndeep, lastObj) {
-    if (obj === lastObj) {
-        return "null";
-    }
-    switch (typeof obj) {
-        case "string":
-            return '"' + obj + '"';
-        case "function":
-            return obj.name || obj.toString();
-        case "object":
-            var indent = Array(ndeep || 1).join('\t'),
-                isArray = Array.isArray(obj);
-            return ('{[' [+isArray] + Object.keys(obj).map(function(key) {
-                return '\n\t' + indent + (isArray ? '' : key + ': ') + objToString(obj[key], (ndeep || 1) + 1, obj);
-            }).join(',') + '\n' + indent + '}]' [+isArray]).replace(/[\s\t\n]+(?=(?:[^\'"]*[\'"][^\'"]*[\'"])*[^\'"]*$)/g, '');
-        default:
-            return obj.toString();
-    }
-}
-
-
 class AndroidSigner extends Signer {
 
     constructor() {
@@ -2352,23 +2331,29 @@ class AndroidSigner extends Signer {
 
 const signer = new AndroidSigner();
 
+function toHexString(byteArray) {
+    return Array.from(byteArray, function(byte) {
+      return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+    }).join('')
+  }
+
+const fromHexString = (hexString) => Uint8Array.from(hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+
 
 async function listenMessages(target) {
-    // Create the client with your wallet. This will connect to the XMTP development network by default    
-    // Start a conversation with Vitalik
-    console.log("sendMessage: ", getMethods(signer))
-
     var address = await signer.getAddress();
-
-    console.log("My precious address (sendMessage): ", JSON.stringify(address), address === undefined)
-
-    if (localStorage.getItem("xmtp") === null) {
-        xmtp = await Client.create(signer);
-        console.log("Stringified xmtp: ", objToString(xmtp))
-        localStorage.setItem("xmtp", objToString(xmtp))
-    } else {
-        xmtp = eval("(" + localStorage.getItem("xmtp") + ")")
-    }
+    const getKeyResult = await window.AndroidSigner.getKey()
+    if (getKeyResult === "null") {
+        const keys = await Client.getKeys(signer)
+        window.AndroidSigner.receiveKey(toHexString(keys))
+        xmtp = await Client.create(null, { privateKeyOverride: keys })
+      } else {
+        try {
+            xmtp = await Client.create(null, { privateKeyOverride: fromHexString(getKeyResult) })
+        } catch(e) {
+            console.log(e.stack)
+        }
+      }
 
 
     const conversation = await xmtp.conversations.newConversation(target)

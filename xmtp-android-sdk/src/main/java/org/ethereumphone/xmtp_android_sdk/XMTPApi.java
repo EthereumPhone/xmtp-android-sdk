@@ -1,6 +1,7 @@
 package org.ethereumphone.xmtp_android_sdk;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -10,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -27,6 +30,7 @@ public class XMTPApi {
     private Map<String, CompletableFuture<ArrayList<String>>> completableFutures;
     private Map<String, CompletableFuture<String>> sentMessages;
     private Map<String, MessageCallback> messageCallbackMap;
+    SharedPreferences sharedPreferences;
 
 
     public XMTPApi(Context con, Signer signer) {
@@ -35,6 +39,7 @@ public class XMTPApi {
         completableFutures = new HashMap<>();
         sentMessages = new HashMap<>();
         messageCallbackMap = new HashMap<>();
+        sharedPreferences = con.getSharedPreferences("key", Context.MODE_PRIVATE);
 
         String content = "";
         try {
@@ -260,6 +265,7 @@ public class XMTPApi {
                 messageCallbackMap.get(target).newMessage(senderAddress, content);
             }
         }
+
     }
 
     private class AndroidSigner {
@@ -271,6 +277,19 @@ public class XMTPApi {
         @JavascriptInterface
         public String signMessage(String message) {
             return signer.signMessage(message);
+        }
+
+        @JavascriptInterface
+        public void receiveKey(String key){
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("key", key);
+            editor.apply();
+        }
+
+        @JavascriptInterface
+        public String getKey(){
+            String result = sharedPreferences.getString("key", "null");
+            return result;
         }
     }
 
