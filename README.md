@@ -5,7 +5,7 @@
 How to initialize the SDK:
 
 ```kotlin
-val xmtpApi = XMTPApi(this)
+val xmtpApi = XMTPApi(this, signer)
 ```
 
 ### Example code
@@ -43,6 +43,10 @@ Returns all accounts with which you had conversations with.
 
 Returns all messages you had with a specific account.
 
+`listenMessages(target: String, messageCallback: MessageCallback)`
+
+Listens to new message from `target` address and calls the `messageCallback` if a new one arrives.
+
 ### How to add the SDK
 
 Go to your root `build.gradle` or `settings.gradle`, and add this:
@@ -64,7 +68,27 @@ dependencies {
 }
 ```
 
-### Current shortcoming
+### Signer
 
-At the moment when initializing the API, it has an account saved, and there is no way yet to import an account. In the future there should be a `@JavascriptInterface`, which handles the common web3 methods.
+To be able to send messages from your own account also receive them, you need to implement the Signer interface:
 
+```java
+public interface Signer {
+    String signMessage(String msg);
+    String getAddress();
+}
+```
+
+I provided an example using [WalletConnectKit](https://github.com/pink-room/walletconnectkit-android) in the example app attached to this repo. If you have MetaMask installed it is really easy to write the Signer Implementation.
+
+### MessageCallback
+
+To use the `listenMessages` function, you need to provide an implementation of the MessageCallback interface:
+
+```java
+public interface MessageCallback {
+    void newMessage(String from, String content);
+}
+```
+
+The function `newMessage` will be called when a new message from a specific address is received.
