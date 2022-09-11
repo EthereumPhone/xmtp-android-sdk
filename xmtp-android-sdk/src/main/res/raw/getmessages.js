@@ -2287,7 +2287,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 }).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
 },{"process/browser.js":5,"timers":6}],7:[function(require,module,exports){
 const { Client } = require('@xmtp/xmtp-js')
-const { Wallet, Signer } = require('ethers')
+const { Wallet, Signer, utils } = require('ethers')
 let wallet;
 let xmtp;
 
@@ -2393,13 +2393,17 @@ async function getMessages(target, msg) {
 
         const messages = await conversation.messages()
 
-        for (const message of messages) {
-            output.push(message.content)
+        for (var message of messages) {
+            var otherMessage = JSON.parse(JSON.stringify(message))
+            otherMessage["senderAddress"] = utils.computeAddress(message.header.sender.identityKey.secp256k1Uncompressed.bytes)
+            output.push(otherMessage)
         }
 
         if (window.Android) {
             window.Android.shareMessages(JSON.stringify(output))
         }
+
+        
     }
     if (WHAT === "sendMessage") {
         console.log("Executing sendMessage if")

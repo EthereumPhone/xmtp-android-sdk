@@ -79,6 +79,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+                xmtpApi.getMessages("0x8c7b6BCFF66990C2fDE0ED2020319a46F1200130").whenComplete(new BiConsumer<ArrayList<String>, Throwable>() {
+                    @Override
+                    public void accept(ArrayList<String> strings, Throwable throwable) {
+                        System.out.println("Message: "+strings.get(0));
+                    }
+                });
+
                 //xmtpApi.listenMessages("0x2374eFc48c028C98e259a7bBcba336d6acFF103c", new MessageCallbackImpl());
 
                 return null;
