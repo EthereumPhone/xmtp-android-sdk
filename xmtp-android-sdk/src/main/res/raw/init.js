@@ -2292,15 +2292,6 @@ const { Wallet, Signer } = require('ethers')
 
 let wallet;
 
-
-if (localStorage.getItem("keys") === null) {
-  wallet = Wallet.createRandom()
-
-  localStorage.setItem("keys", wallet.privateKey)
-} else {
-  wallet = new Wallet(localStorage.getItem("keys"))
-}
-
 class AndroidSigner extends Signer {
 
   constructor() {
@@ -2330,6 +2321,26 @@ class AndroidSigner extends Signer {
     return this;
   }
 }
+
+const signer = new AndroidSigner();
+
+function toHexString(byteArray) {
+  return Array.from(byteArray, function(byte) {
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join('')
+}
+
+async function init() {
+  const getKeyResult = await window.AndroidSigner.getKey()
+  if (getKeyResult === "null") {
+    const keys = await Client.getKeys(signer)
+    window.AndroidSigner.receiveKey(toHexString(keys))
+  } else {
+    console.log("Key already")
+  }
+}
+
+init().then(() => console.log("Done"))
 },{"@xmtp/xmtp-js":129,"ethers":153}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });

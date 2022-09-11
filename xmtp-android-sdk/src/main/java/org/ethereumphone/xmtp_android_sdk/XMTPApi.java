@@ -54,6 +54,8 @@ public class XMTPApi {
         wv.getSettings().setAppCacheEnabled(true); //Enable H5 (APPCache) caching
         wv.getSettings().setDatabaseEnabled(true);
 
+        wv.addJavascriptInterface(new AndroidSigner(), "AndroidSigner");
+
 
         wv.setWebChromeClient(new WebChromeClient() {
             @Override
