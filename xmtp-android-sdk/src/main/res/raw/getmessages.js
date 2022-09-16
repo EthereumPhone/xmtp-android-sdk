@@ -2350,7 +2350,7 @@ async function getMessages(target, msg) {
     console.log(WHAT + ": ", getMethods(signer))
     console.log("ANDROID: ", getMethods(window.AndroidSigner))
 
-    var address = signer.getAddress();
+    var address = await signer.getAddress();
 
     console.log("My precious address (" + WHAT + "): ", JSON.stringify(address), address === undefined)
     /** 
@@ -2393,15 +2393,15 @@ async function getMessages(target, msg) {
 
         const messages = await conversation.messages()
 
+        console.log("Got messages from xmtp conv: ", messages)
+
         for (var message of messages) {
             var otherMessage = JSON.parse(JSON.stringify(message))
             otherMessage["senderAddress"] = utils.computeAddress(message.header.sender.identityKey.secp256k1Uncompressed.bytes)
             output.push(otherMessage)
         }
 
-        if (window.Android) {
-            window.Android.shareMessages(JSON.stringify(output))
-        }
+        window.Android.shareMessages(JSON.stringify(output))
 
         
     }

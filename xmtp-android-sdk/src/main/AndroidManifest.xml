@@ -3,4 +3,5 @@
     package="org.ethereumphone.xmtp_android_sdk">
     <uses-permission android:name="android.permission.INTERNET" />
 
+
 </manifest>

@@ -26,7 +26,9 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import dev.pinkroom.walletconnectkit.WalletConnectButton;
 import dev.pinkroom.walletconnectkit.WalletConnectKit;
@@ -57,13 +59,20 @@ public class MainActivity extends AppCompatActivity {
 
                 XMTPApi xmtpApi = new XMTPApi(con, signer);
 
-/**
                 xmtpApi.getMessages("0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete(new BiConsumer<ArrayList<String>, Throwable>() {
                     @Override
                     public void accept(ArrayList<String> strings, Throwable throwable) {
                         Log.d("First message on XMTP", strings.get(0));
                     }
                 });
+/**
+                xmtpApi.sendMessage("Message sent "+System.currentTimeMillis(), "0x8c7b6BCFF66990C2fDE0ED2020319a46F1200130").whenComplete(new BiConsumer<String, Throwable>() {
+                    @Override
+                    public void accept(String s, Throwable throwable) {
+                        Log.d("Message sent! on XMTP", s);
+                    }
+                });
+
 
                 xmtpApi.getPeerAccounts().whenComplete(new BiConsumer<ArrayList<String>, Throwable>() {
                     @Override
@@ -71,21 +80,32 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("First conversation on XMTP", strings.get(0));
                     }
                 });
- */
-                xmtpApi.sendMessage("Message sent from WU, mit Elie", "0x2374eFc48c028C98e259a7bBcba336d6acFF103c").whenComplete(new BiConsumer<String, Throwable>() {
-                    @Override
-                    public void accept(String s, Throwable throwable) {
-                        Log.d("Message sent! on XMTP", s);
-                    }
-                });
+
+
 
                 xmtpApi.getMessages("0x8c7b6BCFF66990C2fDE0ED2020319a46F1200130").whenComplete(new BiConsumer<ArrayList<String>, Throwable>() {
                     @Override
                     public void accept(ArrayList<String> strings, Throwable throwable) {
-                        System.out.println("Message: "+strings.get(0));
+                        System.out.println("get_Message: "+strings.get(0));
                     }
                 });
+ */
+/**
 
+                try {
+                    ArrayList<String> burh = xmtpApi.getMessages("0x8c7b6BCFF66990C2fDE0ED2020319a46F1200130").get();
+                    burh.forEach(new Consumer<String>() {
+                        @Override
+                        public void accept(String s) {
+                            System.out.println("Result: "+s);
+                        }
+                    });
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+ */
                 //xmtpApi.listenMessages("0x2374eFc48c028C98e259a7bBcba336d6acFF103c", new MessageCallbackImpl());
 
                 return null;
